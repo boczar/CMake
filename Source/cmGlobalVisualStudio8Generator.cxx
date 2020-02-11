@@ -280,7 +280,8 @@ bool cmGlobalVisualStudio8Generator::NeedsDeploy(
   return !noDeploy &&
     (type == cmStateEnums::EXECUTABLE ||
      type == cmStateEnums::SHARED_LIBRARY) &&
-    this->TargetSystemSupportsDeployment();
+    (DeployEnabled(target,config) ||
+	 this->TargetSystemSupportsDeployment());
 }
 
 bool cmGlobalVisualStudio8Generator::DeployInhibited(
@@ -290,6 +291,17 @@ bool cmGlobalVisualStudio8Generator::DeployInhibited(
   if (const char* prop = target.GetProperty("VS_NO_SOLUTION_DEPLOY")) {
     rVal = cmIsOn(
       cmGeneratorExpression::Evaluate(prop, target.LocalGenerator, config));
+  }
+  return rVal;
+}
+
+bool cmGlobalVisualStudio8Generator::DeployEnabled(
+  cmGeneratorTarget const& target, const char* config) const
+{
+  bool rVal = false;
+  if (const char* prop = target.GetProperty("VS_ENABLE_SOLUTION_DEPLOY")) {
+    rVal = cmIsOn(
+		cmGeneratorExpression::Evaluate(prop, target.LocalGenerator, config));
   }
   return rVal;
 }
